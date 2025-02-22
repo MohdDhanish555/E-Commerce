@@ -43,9 +43,9 @@ const Navbar = () => {
       setMenuLoader(true);
       await signOut(firebaseAuth);
       const res = await removeSession();
-      handleMenuClose();
-      toastMessage("success", "Logged out successfully");
       if (res) {
+        toastMessage("success", "Logged out successfully");
+        handleMenuClose();
         router.push("/");
       }
     } catch (err) {
