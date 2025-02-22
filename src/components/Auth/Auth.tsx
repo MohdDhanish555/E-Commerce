@@ -84,7 +84,7 @@ const AuthPage = ({ type }: { type: "login" | "signup" }) => {
           toastMessage("success", "Account created successfully");
         }
       } catch (err) {
-        toastMessage("error", err as string);
+        toastMessage("error", err.message);
       } finally {
         setLoading(false);
       }
@@ -154,7 +154,7 @@ const AuthPage = ({ type }: { type: "login" | "signup" }) => {
             ? "Don't have an account?"
             : "Already have an account?"}{" "}
           <Link
-            href={type === "login" ? "/signup" : "/login"}
+            href={type === "login" ? "/sign-up" : "/login"}
             style={LinkStyle}
           >
             {type === "login" ? "Sign Up" : "Login"}
