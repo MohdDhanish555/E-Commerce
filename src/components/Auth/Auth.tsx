@@ -12,6 +12,7 @@ import {
   signInWithEmailAndPassword,
 } from "firebase/auth";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 
 import { createSession } from "@/actions/auth-action";
@@ -22,6 +23,7 @@ import { AuthContainer, AuthBox } from "./style";
 import { LinkStyle } from "../Common/common.style";
 
 const AuthPage = ({ type }: { type: "login" | "signup" }) => {
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
@@ -69,10 +71,12 @@ const AuthPage = ({ type }: { type: "login" | "signup" }) => {
             formData.password
           );
           if (res.user) {
-            toastMessage("success", "Logged in successfully");
             const token = await res.user?.getIdToken();
-            await createSession(token);
-            setFormData({ email: "", password: "", confirmPassword: "" });
+            const isAuthenticated = await createSession(token);
+            if (isAuthenticated) {
+              router.push("/");
+              toastMessage("success", "Logged in successfully");
+            }
           }
         } else {
           await createUserWithEmailAndPassword(

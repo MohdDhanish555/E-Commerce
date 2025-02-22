@@ -12,7 +12,7 @@ import {
 } from "@mui/material";
 import { signOut } from "firebase/auth";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import React, { useState } from "react";
 
 import { removeSession } from "@/actions/auth-action";
@@ -25,6 +25,7 @@ import { LinkStyle } from "../Common/common.style";
 
 const Navbar = () => {
   const pathname = usePathname();
+  const router = useRouter();
   const [menuLoader, setMenuLoader] = useState(false);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
@@ -41,9 +42,12 @@ const Navbar = () => {
     try {
       setMenuLoader(true);
       await signOut(firebaseAuth);
-      toastMessage("success", "Logged out successfully");
+      const res = await removeSession();
       handleMenuClose();
-      await removeSession();
+      toastMessage("success", "Logged out successfully");
+      if (res) {
+        router.push("/");
+      }
     } catch (err) {
       toastMessage("error", err as string);
     } finally {
