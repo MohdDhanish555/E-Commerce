@@ -4,21 +4,22 @@ import { AxiosResponse } from "axios";
 import { useParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
+import http from "@/utils/http";
+import { toastMessage } from "@/utils/toast";
+
 import InfoLoader from "./InfoLoader";
 import { ButtonContainer, DetailsContainer, ImageCard } from "./style";
 import { FireGlowChip } from "../Common/CustomChip";
 import ImageWithFallback from "../Common/ImageWithFallback";
-
-import http from "@/utils/http";
-import { toastMessage } from "@/utils/toast";
+import { WishlistButton } from "../Common/Products";
 
 const ProductInfo = ({ setRoutes }) => {
   const { id } = useParams();
 
   const [productDetails, setProductDetails] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const [adding, setAdding] = useState<boolean>(false);
   const [count, setCount] = useState<number>(1);
+  const [isWishlisted, setIsWishlisted] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -27,6 +28,11 @@ const ProductInfo = ({ setRoutes }) => {
 
         const res: AxiosResponse = await http.get(`/products/${id}`);
         setProductDetails(res.data?.product);
+        setIsWishlisted(
+          JSON.parse(
+            localStorage?.getItem("agetware-wishlist") || "[]"
+          ).includes(res.data?.product?.id)
+        );
         setRoutes([
           { label: "Home", path: "/" },
           { label: "Product", path: `/#products` },
@@ -48,7 +54,6 @@ const ProductInfo = ({ setRoutes }) => {
   }, [setLoading, id, setRoutes]);
 
   const handleAdd = () => {
-    setAdding(true);
     const cartData = JSON.parse(localStorage.getItem("agentware-cart") || "{}");
     if (cartData[productDetails?.id]) {
       cartData[productDetails?.id].quantity =
@@ -57,7 +62,6 @@ const ProductInfo = ({ setRoutes }) => {
       cartData[productDetails?.id] = { ...productDetails, quantity: count };
     }
     localStorage.setItem("agentware-cart", JSON.stringify(cartData));
-    setAdding(false);
     toastMessage("success", "Added to Cart");
   };
 
@@ -71,6 +75,27 @@ const ProductInfo = ({ setRoutes }) => {
     }
   };
 
+  const toggleWishlist = (e: React.MouseEvent, id: number) => {
+    e.preventDefault();
+    const wishlist = JSON.parse(
+      localStorage?.getItem("agetware-wishlist") || "[]"
+    );
+
+    if (wishlist.includes(id)) {
+      localStorage.setItem(
+        "agetware-wishlist",
+        JSON.stringify(wishlist.filter((idx: number) => idx != id))
+      );
+      setIsWishlisted(false);
+    } else {
+      localStorage.setItem(
+        "agetware-wishlist",
+        JSON.stringify([...wishlist, id])
+      );
+      setIsWishlisted(true);
+    }
+  };
+
   return loading ? (
     <InfoLoader />
   ) : (
@@ -81,6 +106,11 @@ const ProductInfo = ({ setRoutes }) => {
           alt={productDetails?.category || "Product"}
           width={400}
           height={400}
+        />
+        <WishlistButton
+          id={productDetails?.id}
+          toggleWishlist={toggleWishlist}
+          isWishlisted={isWishlisted}
         />
       </Box>
       <Box sx={DetailsContainer}>

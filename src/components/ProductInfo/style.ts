@@ -1,6 +1,7 @@
 import { SxProps } from "@mui/material";
 
 export const ImageCard: SxProps = {
+  position: "relative",
   alignSelf: "flex-start",
   borderRadius: "20px",
   boxShadow: "rgba(99, 99, 99, 0.2) 0px 2px 8px 0px",
