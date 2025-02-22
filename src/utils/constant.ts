@@ -23,3 +23,8 @@ export const NAVLINKS: NavlinksType[] = [
 ];
 
 export const FALLBACK_IMAGE = "/placeholder-3.png";
+
+export const ROOT_ROUTE = "/";
+export const HOME_ROUTE = "/";
+
+export const SESSION_COOKIE_NAME = "user_session";

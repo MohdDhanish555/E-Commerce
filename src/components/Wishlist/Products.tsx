@@ -26,8 +26,6 @@ const Products = () => {
     );
   };
 
-  console.log({ favProducts });
-
   useEffect(() => {
     const fetchData = async () => {
       try {

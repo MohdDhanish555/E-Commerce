@@ -1,16 +1,55 @@
 "use client";
-import { Box, IconButton, Typography } from "@mui/material";
+import { PersonOutline } from "@mui/icons-material";
+import {
+  Box,
+  CircularProgress,
+  IconButton,
+  ListItemIcon,
+  ListItemText,
+  Menu,
+  MenuItem,
+  Typography,
+} from "@mui/material";
+import { signOut } from "firebase/auth";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import React from "react";
+import React, { useState } from "react";
+
+import { removeSession } from "@/actions/auth-action";
+import { firebaseAuth } from "@/lib/firebase/firebase";
+import { NAVLINKS } from "@/utils/constant";
+import { toastMessage } from "@/utils/toast";
 
 import { NavbarContainer, NavlinksContainer } from "./style";
 import { LinkStyle } from "../Common/common.style";
 
-import { NAVLINKS } from "@/utils/constant";
-
 const Navbar = () => {
   const pathname = usePathname();
+  const [menuLoader, setMenuLoader] = useState(false);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const open = Boolean(anchorEl);
+
+  const handleMenuClick = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const logoutUser = async () => {
+    try {
+      setMenuLoader(true);
+      await signOut(firebaseAuth);
+      toastMessage("success", "Logged out successfully");
+      handleMenuClose();
+      await removeSession();
+    } catch (err) {
+      toastMessage("error", err as string);
+    } finally {
+      setMenuLoader(false);
+    }
+  };
 
   return (
     <Box sx={NavbarContainer}>
@@ -43,7 +82,32 @@ const Navbar = () => {
             </Link>
           );
         })}
+        <IconButton sx={{ color: "inherit" }} onClick={handleMenuClick}>
+          <PersonOutline fontSize="medium" />
+        </IconButton>
       </Box>
+      <Menu
+        anchorEl={anchorEl}
+        open={open}
+        onClose={handleMenuClose}
+        TransitionProps={{
+          exit: false,
+        }}
+      >
+        <MenuItem
+          disabled={menuLoader}
+          onClick={() => {
+            logoutUser();
+          }}
+        >
+          <ListItemText>Logout</ListItemText>
+          {menuLoader && (
+            <ListItemIcon>
+              <CircularProgress size={18} sx={{ ml: 1 }} />
+            </ListItemIcon>
+          )}
+        </MenuItem>
+      </Menu>
     </Box>
   );
 };
